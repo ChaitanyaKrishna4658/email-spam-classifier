@@ -1,85 +1,141 @@
+# Email Spam Classifier 📧
+
+## Installing Required Libraries
+
+```python
 !pip install pandas
 !pip install scikit-learn
 !pip install nltk
+```
 
-Requirement already satisfied: pandas in /usr/local/lib/python3.12/dist-packages (2.2.2)
-Requirement already satisfied: numpy>=1.26.0 in /usr/local/lib/python3.12/dist-packages (from pandas) (2.0.2)
-Requirement already satisfied: python-dateutil>=2.8.2 in /usr/local/lib/python3.12/dist-packages (from pandas) (2.9.0.post0)
-Requirement already satisfied: pytz>=2020.1 in /usr/local/lib/python3.12/dist-packages (from pandas) (2025.2)
-Requirement already satisfied: tzdata>=2022.7 in /usr/local/lib/python3.12/dist-packages (from pandas) (2026.1)
-Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.12/dist-packages (from python-dateutil>=2.8.2->pandas) (1.17.0)
-Requirement already satisfied: scikit-learn in /usr/local/lib/python3.12/dist-packages (1.6.1)
-Requirement already satisfied: numpy>=1.19.5 in /usr/local/lib/python3.12/dist-packages (from scikit-learn) (2.0.2)
-Requirement already satisfied: scipy>=1.6.0 in /usr/local/lib/python3.12/dist-packages (from scikit-learn) (1.16.3)
-Requirement already satisfied: joblib>=1.2.0 in /usr/local/lib/python3.12/dist-packages (from scikit-learn) (1.5.3)
-Requirement already satisfied: threadpoolctl>=3.1.0 in /usr/local/lib/python3.12/dist-packages (from scikit-learn) (3.6.0)
-Requirement already satisfied: nltk in /usr/local/lib/python3.12/dist-packages (3.9.1)
-Requirement already satisfied: click in /usr/local/lib/python3.12/dist-packages (from nltk) (8.3.3)
-Requirement already satisfied: joblib in /usr/local/lib/python3.12/dist-packages (from nltk) (1.5.3)
-Requirement already satisfied: regex>=2021.8.3 in /usr/local/lib/python3.12/dist-packages (from nltk) (2025.11.3)
-Requirement already satisfied: tqdm in /usr/local/lib/python3.12/dist-packages (from nltk) (4.67.3)
+---
 
-# CSV file to colab 
+## Upload CSV File to Google Colab
+
+```python
 from google.colab import files
 
 uploaded = files.upload()
+```
 
-#Output
+### Output
+```text
 spam.csv
-spam.csv(text/csv) - 503663 bytes, last modified: 5/24/2026 - 100% done
 Saving spam.csv to spam.csv
+```
+
+---
 
 # Python Code
-import pandas as pd  # Used for handling datasets
-from sklearn.feature_extraction.text import CountVectorizer #Converts text into numbers
-from sklearn.model_selection import train_test_split # Splitting of datasets
-from sklearn.naive_bayes import MultinomialNB #used for classification
-from sklearn.metrics import accuracy_score # for accuracy checking
 
-# Load dataset
-data = pd.read_csv("spam.csv", encoding='latin-1') # reads csv datset and latin helps to special char
+```python
+# Import Libraries
 
-# Keep required columns
-data = data[['v1', 'v2']] # for spam and non spam (2 cols)
+import pandas as pd  
+# Used for handling datasets
 
-# Rename columns
-data.columns = ['label', 'message'] # renaming of variables 
+from sklearn.feature_extraction.text import CountVectorizer  
+# Converts text into numerical format
 
-# Convert labels into numbers
+from sklearn.model_selection import train_test_split  
+# Used for splitting dataset into training and testing data
+
+from sklearn.naive_bayes import MultinomialNB  
+# Naive Bayes algorithm used for classification
+
+from sklearn.metrics import accuracy_score  
+# Used for checking model accuracy
+
+
+# Load Dataset
+
+data = pd.read_csv("spam.csv", encoding='latin-1')
+# Reads CSV dataset
+# latin-1 helps handle special characters
+
+
+# Keep Required Columns
+
+data = data[['v1', 'v2']]
+# v1 = label (spam/ham)
+# v2 = message text
+
+
+# Rename Columns
+
+data.columns = ['label', 'message']
+# Renaming columns for better understanding
+
+
+# Convert Labels into Numbers
+
 data['label'] = data['label'].map({
     'ham': 0,
-    'spam': 1  # labels to numbers (Lable encoding)
+    'spam': 1
 })
+# ham = 0
+# spam = 1
+# This process is called Label Encoding
 
-# Input and output
+
+# Input and Output
+
 x = data['message']
-y = data['label']
+# Input messages
 
-# Convert text into vectors
-cv = CountVectorizer() # words into numbers 
+y = data['label']
+# Output labels
+
+
+# Convert Text into Vectors
+
+cv = CountVectorizer()
+# Converts words into numerical vectors
+
 x = cv.fit_transform(x)
 
-# Split dataset
-x_train, x_test, y_train, y_test = train_test_split( # x_train training messages, x_text training messages
+
+# Split Dataset
+
+x_train, x_test, y_train, y_test = train_test_split(
     x,
     y,
-    test_size=0.2, # 20% data for testing 80% for training
+    test_size=0.2,
     random_state=42
 )
 
-# Create model
-model = MultinomialNB(alpha=0.1)
+# 80% data used for training
+# 20% data used for testing
 
-# Train model 
-model.fit(x_train, y_train) #learns by training messages
+
+# Create Model
+
+model = MultinomialNB(alpha=0.1)
+# Naive Bayes classifier model
+
+
+# Train Model
+
+model.fit(x_train, y_train)
+# Model learns from training data
+
 
 # Prediction
-y_pred = model.predict(x_test) # And predits the test data 
+
+y_pred = model.predict(x_test)
+# Predicts test data
+
+
+# Accuracy Checking
+
 print("===== EMAIL SPAM CLASSIFIER =====")
-# Accuracy
-accuracy = accuracy_score(y_test, y_pred) 
+
+accuracy = accuracy_score(y_test, y_pred)
 
 print("Model Accuracy:", round(accuracy * 100, 2), "%")
+
+
+# Full Email Testing
 
 email_text = """
 Subject: College Project Submission
@@ -98,34 +154,74 @@ Regards,
 Project Coordinator
 """
 
+
+# Convert Email into Vector
+
 email_vector = cv.transform([email_text])
 
-# Predict
+
+# Predict Email
+
 prediction = model.predict(email_vector)
 
+
+# Final Output
 
 if prediction[0] == 1:
     print("Spam Message")
 else:
     print("Not Spam Message")
+```
 
-Output Cell:
+---
+
+# Output
+
+```text
 ===== EMAIL SPAM CLASSIFIER =====
+
 Model Accuracy: 98.03 %
+
 Not Spam Message
+```
 
+---
 
-for Spam Message demo:
+# Spam Email Demo
 
-# Subject: Congratulations Winner!
+```text
+Subject: Congratulations Winner!
 
-# Dear Customer,
+Dear Customer,
 
-# You have been selected as the lucky winner of a free iPhone 16.
+You have been selected as the lucky winner of a free iPhone 16.
 
-# Click the link below to claim your reward immediately.
+Click the link below to claim your reward immediately.
 
-# Limited offer. Hurry up!
+Limited offer. Hurry up!
 
-# Regards,
-# Prize Team
+Regards,
+Prize Team
+```
+
+Expected Output:
+
+```text
+Spam Message
+```
+
+---
+
+# Machine Learning Workflow
+
+```text
+Dataset
+   ↓
+Text Preprocessing
+   ↓
+Convert Text into Numbers
+   ↓
+Train Model
+   ↓
+Spam / Not Spam Prediction
+```
